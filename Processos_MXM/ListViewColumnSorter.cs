@@ -6,46 +6,37 @@ namespace Processos_MXM
 {
     public class ListViewColumnSorter : IComparer
     {
-        /// <summary>
-        /// Specifies the column to be sorted
-        /// </summary>
+        // Especifica a coluna que será ordenada
         private int ColumnToSort;
-        /// <summary>
-        /// Specifies the order in which to sort (i.e. 'Ascending').
-        /// </summary>
+
+        // Especifica a ordem que será realizada (Ascendente || Descendente)
         private SortOrder OrderOfSort;
-        /// <summary>
-        /// Case insensitive comparer object
-        /// </summary>
+
+        // Case Senstivive para comparar os objetos
         private CaseInsensitiveComparer ObjectCompare;
 
-        /// <summary>
-        /// Class constructor.  Initializes various elements
-        /// </summary>
+
+        // Construtor que inicializa os elementos 
         public ListViewColumnSorter()
         {
-            // Initialize the column to '0'
+            // Iniciliaza a coluna com 0
             ColumnToSort = 0;
 
-            // Initialize the sort order to 'none'
+            // Inicializa a ordem da coluna para nenhum
             OrderOfSort = SortOrder.None;
 
-            // Initialize the CaseInsensitiveComparer object
+            // Inicializa o case sensitive 
             ObjectCompare = new CaseInsensitiveComparer();
         }
 
-        /// <summary>
-        /// This method is inherited from the IComparer interface.  It compares the two objects passed using a case insensitive comparison.
-        /// </summary>
-        /// <param name="x">First object to be compared</param>
-        /// <param name="y">Second object to be compared</param>
-        /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
+        // Esse método herda da interface IComparer que compara os dois objetos passados usando o case insenstive na comparação
+        // O resultado da comparação: "0" se igual, negativo se 'x' for menor que 'y' e positivo se 'x' for maior que 'y'
         public int Compare(object x, object y)
         {
             int compareResult;
             ListViewItem listviewX, listviewY;
 
-            // Cast the objects to be compared to ListViewItem objects
+            //Converte os objetos a serem comparados aos objetos ListViewItem
             listviewX = (ListViewItem)x;
             listviewY = (ListViewItem)y;
 
@@ -56,31 +47,29 @@ namespace Processos_MXM
             }
             else
             {
-                // Compare the two items
+                // Compara os dois items
                 compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
             }
 
-            // Calculate correct return value based on object comparison
+            // Calcular o valor de retorno correto com base na comparação de objetos
             if (OrderOfSort == SortOrder.Ascending)
             {
-                // Ascending sort is selected, return normal result of compare operation
+                // A classificação crescente está selecionada, retorna o resultado normal da operação de comparação
                 return compareResult;
             }
             else if (OrderOfSort == SortOrder.Descending)
             {
-                // Descending sort is selected, return negative result of compare operation
+                // A classificação decrescente está selecionada, retorna o resultado negativo da operação de comparação
                 return (-compareResult);
             }
             else
             {
-                // Return '0' to indicate they are equal
+                // Retorna '0' para indicar que eles são iguais
                 return 0;
             }
         }
 
-        /// <summary>
-        /// Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
-        /// </summary>
+        // Obtém ou define o número da coluna à qual aplicar a operação de classificação (o padrão é '0').
         public int SortColumn
         {
             set
@@ -93,9 +82,7 @@ namespace Processos_MXM
             }
         }
 
-        /// <summary>
-        /// Gets or sets the order of sorting to apply (for example, 'Ascending' or 'Descending').
-        /// </summary>
+        // Obtém ou define a ordem de classificação a ser aplicada (por exemplo, 'Ascendente' ou 'Decrescente').
         public SortOrder Order
         {
             set

@@ -11,19 +11,19 @@ namespace Processos_MXM
         public FrmProcesso()
         {
             InitializeComponent();
-            // AdmMode();
+            InitListView();
             lvwColumnSorter = new ListViewColumnSorter();
             this.lstProcesso.ListViewItemSorter = lvwColumnSorter;
 
-            InitListView();
         }
         private void InitListView()
         {
+            //Inicia alterando as configurações da view
             lstProcesso.View = View.Details;
             lstProcesso.GridLines = true;
             lstProcesso.FullRowSelect = true;
 
-            //Adiciona Coluna
+            //Adiciona Colunas com os seus tamanhos
             lstProcesso.Columns.Add("Nome", 200);
             lstProcesso.Columns.Add("Id", 60);
             lstProcesso.Columns.Add("Status", 60);
@@ -33,43 +33,57 @@ namespace Processos_MXM
 
         private void FrmProcesso_Load(object sender, EventArgs e)
         {
+            //Carregamento automático
             ListarProcessos();
         }
 
         public void ListarProcessos()
         {
-
+            // Carrega a máquina local adicionando ela ao método GetProcess
             string localProcess = Environment.MachineName;
             var processos = Process.GetProcesses(localProcess);
             foreach (Process processo in processos)
             {
+                //Foreach para adicionar os processos
                 ListViewItem list = new ListViewItem();
+
+                // Status para saber se um dos processos está ou não respondendo
                 string st = (processo.Responding == true ? "Rodando" : "Travado");
+
                 var nome = processo.ProcessName;
                 var id = processo.Id.ToString();
+                
+                //Atribuição a variavel status
                 var status = st;
-                var ram = ConverterByte(processo.PrivateMemorySize64);
-                var memoriaFisica = processo.WorkingSet64.ToString();
 
+                // Primeiro chamamos o método que converte os bytes em strings pra melhor
+                // compreensão passando o processo e a propriedade Private Memory
+                var ram = ConverterByte(processo.PrivateMemorySize64);
+
+                // Memória Física dos processos convertido
+                var memoriaFisica = ConverterByte(processo.WorkingSet64);
+
+                // Adiciona cada processo em uma lista
                 list.Text = nome;
                 list.SubItems.Add(id);
                 list.SubItems.Add(status);
                 list.SubItems.Add(ram);
                 list.SubItems.Add(memoriaFisica);
-                //list.Text = nome;
-                // list.SubItems.Add(id);
+
+                // Adiciona todos os processos no ListView para apresentação
                 lstProcesso.Items.Add(list);
 
             }
-            
+
         }
 
         private void lstProcesso_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            // Determine if clicked column is already the column that is being sorted.
+            // Determina se a coluna clicada já é a coluna sendo ordenada 
             if (e.Column == lvwColumnSorter.SortColumn)
             {
-                // Reverse the current sort direction for this column.
+
+                // Condição que reverte a ordem da coluna
                 if (lvwColumnSorter.Order == SortOrder.Ascending)
                 {
                     lvwColumnSorter.Order = SortOrder.Descending;
@@ -81,26 +95,28 @@ namespace Processos_MXM
             }
             else
             {
-                // Set the column number that is to be sorted; default to ascending.
+                // Adiciona uma numeração para a coluna com o padrão ascendente
                 lvwColumnSorter.SortColumn = e.Column;
                 lvwColumnSorter.Order = SortOrder.Ascending;
             }
-
-            // Perform the sort with these new sort options.
+            // Adiciona a nova configuração ao listview
             this.lstProcesso.Sort();
         }
 
         public string ConverterByte(long numero)
         {  // Complexo
-           //Lista de sufixos que serão usados 
+           //Lista de sufixos que serão usados para formatação
             List<string> suffixes = new List<string> { " B", " KB", " MB", " GB", " TB", " PB" };
 
             for (int i = 0; i < suffixes.Count; i++)
             {
+                // Pra cada processo em sexecução que for menor que a quantidade dos sufixos
+                // será executado o loop que faz a potência de 1024 mais a quantidade de bites do processo dividido pelo bites recebido
                 long temp = numero / (int)Math.Pow(1024, i + 1);
 
                 if (temp == 0)
                 {
+                    // Quando chegar a 0 é feito outro cálculo para acrescentar o sufixo
                     return (numero / (int)Math.Pow(1024, i)) + suffixes[i];
                 }
             }
@@ -108,61 +124,6 @@ namespace Processos_MXM
             return numero.ToString();
         }
     }
-
-    /* Não funciona porque está executando uma propriedade em 64bits 
-    private void AdmMode()
-    {
-        WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-        bool adminMode = principal.IsInRole(WindowsBuiltInRole.Administrator);
-
-        if (!adminMode)
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.Verb = "runas";
-            startInfo.FileName = Assembly.GetExecutingAssembly().CodeBase;
-            try
-            {
-                Process.Start(startInfo);
-                MessageBox.Show("Admin Mode", "Admin", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-           catch
-           {
-
-                throw new Exception("Acesso Negado");
-            }
-       }
-    }
-
-     void ProcessosExe()
-     {
-      Funciona mas não pega memória RAM
-
-        ManagementClass management = new ManagementClass("Win32_Process");
-        ManagementObjectCollection collection = management.GetInstances();
-        foreach (ManagementObject processo in collection)
-       {
-         Process pro = new Process();
-            ListViewItem list = new ListViewItem();
-          list.Text = (processo["ProcessId"].ToString());
-            list.SubItems.Add((string)processo["Name"]);
-            list.SubItems.Add((string)processo["ExecutablePath"]);
-            // list.SubItems.Add((string)processo["WorkingSet"]); --Não funciona
-           // list.SubItems.Add((string)processo["PercentProcessorTime"]); -- Não funciona
-            try
-            {
-                FileVersionInfo info = FileVersionInfo.GetVersionInfo((string)processo["ExecutablePath"]);
-                list.SubItems.Add(info.FileDescription);
-           }
-            catch
-           {
-               list.SubItems.Add("Indisponível");
-            }
-
-            lstProcessos.Items.Add(list);
-       } 
-
-     */
-
 
 }
 
